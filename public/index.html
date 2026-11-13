@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f1e7">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='10' fill='%23b4492c'/%3E%3Cpath d='M8 24V15a8 8 0 0 1 16 0v9' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='19' r='2.6' fill='white'/%3E%3C/svg%3E">
+<title>Haven – a quiet place to think out loud</title>
+<style>
+:root{--paper:#f6f1e7;--card:#fffdf8;--ink:#211e1a;--mut:#756e62;--rule:#e3dac9;--rust:#b4492c;--rust2:#97391f;--wash:#eee5d3;--sage:#e4ebe2}
+@media (prefers-color-scheme:dark){:root{--paper:#171512;--card:#211e1a;--ink:#efe9dd;--mut:#a1998a;--rule:#383229;--rust:#e0825f;--rust2:#f09a79;--wash:#2a2620;--sage:#222a24}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.serif,h1,h2,h3{font-family:Georgia,"Iowan Old Style","Times New Roman",serif}
+h1,h2,h3{font-weight:400;margin:0}
+a{color:var(--rust)}
+.hide{display:none!important}
+input{font:inherit;color:inherit}
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 22px;border-radius:999px;border:1.5px solid transparent;font:600 15px/1 system-ui,sans-serif;cursor:pointer;transition:background .15s,color .15s,border-color .15s,transform .1s;white-space:nowrap;text-decoration:none}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible,.nav-i:focus-visible,.mood:focus-visible{outline:2px solid var(--rust);outline-offset:2px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.pri{background:var(--ink);color:var(--paper)}.btn.pri:hover{background:var(--rust);color:#fff}
+.btn.acc{background:var(--rust);color:#fff}.btn.acc:hover{background:var(--rust2)}
+.btn.out{background:transparent;color:var(--ink);border-color:var(--ink)}.btn.out:hover{background:var(--ink);color:var(--paper)}
+.btn.ghost{background:transparent;color:var(--mut)}.btn.ghost:hover{background:var(--wash);color:var(--ink)}
+.btn.sm{height:36px;padding:0 16px;font-size:14px}
+.btn.block{width:100%}
+.lnk{background:none;border:0;padding:0;font:inherit;color:var(--rust);text-decoration:underline;cursor:pointer}
+.eyebrow{display:inline-block;padding:5px 14px;border:1px solid var(--rule);border-radius:999px;font-size:13px;color:var(--mut);background:var(--card);margin-bottom:22px}
+.meta{color:var(--mut);font-size:14px}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:18px;padding:24px}
+
+/* ---------- HOME ---------- */
+#home{display:none}#home.on{display:block}
+.nav{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;gap:14px;height:68px}
+.logo{display:flex;align-items:center;gap:10px;font-family:Georgia,serif;font-size:25px}
+.logo svg{width:32px;height:32px;flex:none}.logo rect{fill:var(--rust)}
+.nav-links{display:flex;gap:26px;font-size:15px}
+.nav-links a{color:var(--ink);text-decoration:none}.nav-links a:hover{color:var(--rust)}
+.nav-act{display:flex;gap:10px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 min(5vw,40px)}
+.sec{padding:84px 0}
+.hero{padding:72px 0 88px;position:relative;overflow:hidden}
+.hero:before{content:"";position:absolute;width:520px;height:520px;border-radius:50%;background:var(--wash);right:-140px;top:-120px;z-index:-1}
+.hero-g{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
+.hero h1{font-size:clamp(42px,6.2vw,72px);line-height:1.02;letter-spacing:-.025em;margin-bottom:22px}
+.hero h1 em{color:var(--rust);font-style:italic}
+.lead{font-family:Georgia,serif;font-size:20px;color:var(--mut);max-width:30em;margin:0 0 30px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.trust{display:flex;gap:22px;flex-wrap:wrap;margin-top:28px;font-size:14px;color:var(--mut)}
+.trust span:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--rust);margin-right:8px}
+.mock{background:var(--card);border:1px solid var(--rule);border-radius:22px;padding:22px;box-shadow:0 24px 60px -30px rgba(40,25,10,.35)}
+.mock .top{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mut);padding-bottom:14px;border-bottom:1px solid var(--rule);margin-bottom:16px}
+.mock .top i{width:9px;height:9px;border-radius:50%;background:#6f9a7c}
+.bub{padding:11px 15px;border-radius:16px;max-width:88%;font-size:15px;margin-bottom:11px}
+.bub.a{background:var(--wash);border-bottom-left-radius:4px}
+.bub.u{background:var(--ink);color:var(--paper);margin-left:auto;border-bottom-right-radius:4px}
+.chip{display:flex;align-items:center;gap:10px;margin-top:16px;padding:12px 14px;border:1px dashed var(--rust);border-radius:14px;font-size:14px;color:var(--rust)}
+.chip b{font-family:Georgia,serif;font-size:20px;font-weight:400}
+.sec h2{font-size:clamp(30px,4vw,42px);letter-spacing:-.015em;margin-bottom:12px}
+.sub{color:var(--mut);max-width:36em;margin:0 0 44px;font-size:17px}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+.step{padding:26px 24px}
+.step .n{font-family:Georgia,serif;font-size:40px;color:var(--rust);line-height:1;margin-bottom:14px}
+.step h3{font-size:21px;margin-bottom:8px}
+.step p{margin:0;color:var(--mut);font-size:15px}
+.feat{padding:26px 24px;border-top:3px solid var(--rust)}
+.feat h3{font-size:21px;margin-bottom:8px}.feat p{margin:0;color:var(--mut);font-size:15px}
+.alt{background:var(--wash)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.two ul{margin:12px 0 0;padding:0;list-style:none}
+.two li{padding:9px 0 9px 28px;border-top:1px solid var(--rule);position:relative;font-size:15px}
+.two li:before{position:absolute;left:0;font-weight:700}
+.yes li:before{content:"✓";color:#4b7a5b}.no li:before{content:"✕";color:var(--rust)}
+.safe-g{display:grid;grid-template-columns:1fr 1.1fr;gap:44px;align-items:start}
+.crisis{border:1px solid var(--rust);background:var(--card);border-radius:16px;padding:18px 20px;font-size:15px}
+.crisis h3{margin:0 0 8px;color:var(--rust);font-size:19px;font-family:system-ui,sans-serif;font-weight:600}
+.crisis p{margin:0 0 8px}.crisis ul{margin:8px 0;padding-left:18px}.crisis li{margin:4px 0}
+.pv-g{display:grid;grid-template-columns:1fr 1fr;gap:56px}
+.pv-g ul{padding-left:18px;margin:0}.pv-g li{margin:9px 0;color:var(--mut)}
+details.faq{border-top:1px solid var(--rule);padding:15px 0}
+details.faq summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between}
+details.faq summary:after{content:"+";color:var(--rust);font-size:20px;line-height:1}
+details.faq[open] summary:after{content:"–"}
+details.faq p{margin:10px 0 0;color:var(--mut);font-size:15px}
+.band{background:var(--ink);color:var(--paper);text-align:center;padding:84px 0}
+.band h2{font-size:clamp(32px,5vw,50px);margin-bottom:14px}
+.band p{opacity:.75;margin:0 auto 30px;max-width:30em;font-family:Georgia,serif;font-size:19px}
+.band .btn.acc{height:50px;padding:0 30px;font-size:16px}
+footer.f{padding:34px 0;font-size:13px;color:var(--mut)}
+footer.f .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* ---------- AUTH ---------- */
+#auth{min-height:100vh;display:none;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 80% 10%,var(--wash),transparent 55%)}
+#auth.on{display:flex}
+.ac{width:100%;max-width:420px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--wash);border-radius:999px;padding:4px;margin:22px 0}
+.tabs button{border:0;background:none;height:38px;border-radius:999px;font:600 14px system-ui;color:var(--mut);cursor:pointer}
+.tabs button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-size:13px;color:var(--mut);margin-bottom:6px}
+.fld input{width:100%;height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--rule);background:var(--paper);outline:0}
+.fld input:focus{border-color:var(--rust);box-shadow:0 0 0 3px color-mix(in srgb,var(--rust) 18%,transparent)}
+.err{color:var(--rust);font-size:14px;min-height:20px;margin:0 0 10px}
+.or{display:flex;align-items:center;gap:12px;color:var(--mut);font-size:13px;margin:18px 0}
+.or:before,.or:after{content:"";flex:1;height:1px;background:var(--rule)}
+
+/* ---------- APP ---------- */
+#app{display:none;grid-template-columns:272px 1fr;height:100vh;height:100dvh}
+#app.on{display:grid;grid-template-rows:minmax(0,1fr)}
+aside{border-right:1px solid var(--rule);padding:16px 14px;display:flex;flex-direction:column;gap:3px;overflow:hidden;background:var(--card)}
+aside .logo{padding:2px 8px 16px}
+.nav-i{display:flex;align-items:center;gap:10px;width:100%;height:38px;padding:0 12px;border:0;border-radius:12px;background:none;font:500 15px system-ui;color:var(--ink);cursor:pointer;text-align:left}
+.nav-i:hover,.nav-i.on{background:var(--wash)}
+.nav-i svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.lab{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);padding:12px 12px 4px}
+.past{padding:10px 12px;border-radius:12px;cursor:pointer;font-size:14px}
+.past:hover{background:var(--wash)}
+.past b{display:block;font-weight:600}.past small{color:var(--mut)}
+.trend{display:flex;gap:4px;align-items:flex-end;height:44px;margin:4px 12px 8px}
+.trend i{flex:1;background:var(--rust);min-width:6px;opacity:.75;border-radius:3px 3px 0 0}
+.side-foot{margin-top:auto;padding:14px 8px 0;border-top:1px solid var(--rule);font-size:12.5px;color:var(--mut)}
+.side-foot .row{display:flex;gap:2px;margin:6px 0 10px -12px;flex-wrap:wrap}.side-foot .btn{padding:0 12px}
+main{display:flex;flex-direction:column;min-width:0;min-height:0;height:100%}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px min(4vw,40px);border-bottom:1px solid var(--rule);background:var(--card)}
+.head .t{font-weight:600}.head .t small{display:block;font-weight:400;color:var(--mut);font-size:13px}
+.pane{flex:1;min-height:0;overflow-y:auto;padding:30px min(4vw,40px)}
+.col{max-width:700px;margin:0 auto}
+.pg-h{font-size:clamp(28px,4vw,38px);letter-spacing:-.015em;margin:6px 0 6px}
+.moods{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:26px 0}
+.mood{border:1.5px solid var(--rule);background:var(--card);border-radius:16px;padding:18px 6px;cursor:pointer;font:inherit;color:var(--ink);transition:.15s}
+.mood:hover{border-color:var(--rust);transform:translateY(-2px)}
+.mood b{display:block;font:400 30px Georgia,serif;color:var(--rust)}
+.mood span{font-size:13px;color:var(--mut)}
+.msg{display:flex;gap:12px;margin-bottom:18px;align-items:flex-start}
+.msg .av{width:32px;height:32px;border-radius:50%;background:var(--rust);color:#fff;font:600 14px Georgia,serif;display:flex;align-items:center;justify-content:center;flex:none}
+.msg .bb{background:var(--card);border:1px solid var(--rule);border-radius:4px 18px 18px 18px;padding:12px 16px;white-space:pre-wrap;max-width:min(560px,86%)}
+.msg.me{justify-content:flex-end}
+.msg.me .bb{background:var(--ink);color:var(--paper);border-color:var(--ink);border-radius:18px 4px 18px 18px}
+.bar{padding:14px min(4vw,40px) 18px;background:var(--paper);border-top:1px solid var(--rule)}
+.comp{max-width:700px;margin:0 auto;display:flex;gap:10px;align-items:center;background:var(--card);border:1.5px solid var(--rule);border-radius:999px;padding:6px 6px 6px 22px}
+.comp:focus-within{border-color:var(--rust)}
+.comp input{flex:1;border:0;outline:0;background:none;height:40px;min-width:0}
+.send{width:42px;height:42px;border-radius:50%;border:0;background:var(--rust);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
+.send:hover{background:var(--rust2)}.send:disabled{opacity:.45}
+.send svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.note{max-width:700px;margin:8px auto 0;text-align:center;font-size:12px;color:var(--mut)}
+.tag{display:inline-block;background:var(--wash);border-radius:999px;padding:3px 12px;margin:3px 6px 3px 0;font-size:13px}
+.sum h3{font-size:22px;margin:24px 0 8px}
+.steps-l{list-style:none;padding:0;margin:0;counter-reset:s}
+.steps-l li{counter-increment:s;display:flex;gap:14px;align-items:flex-start;padding:14px 16px;background:var(--card);border:1px solid var(--rule);border-radius:14px;margin:10px 0}
+.steps-l li:before{content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;background:var(--rust);color:#fff;font:600 13px/26px system-ui;text-align:center}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+.dots span{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--mut);animation:b 1s infinite}
+.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes b{50%{transform:translateY(-4px)}}
+/* breathing */
+.bwrap{position:relative;width:280px;height:280px;margin:36px auto 6px}
+.bring{position:absolute;inset:0;border-radius:50%;border:2px dashed var(--rule)}
+.bc{position:absolute;inset:0;margin:auto;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--rust) 70%,#fff),var(--rust));transform:scale(.5);opacity:.92}
+.blab{text-align:center;font:400 28px Georgia,serif;min-height:42px}
+.bcount{text-align:center;color:var(--mut);font-size:14px;margin:4px 0 22px}
+@media (max-width:900px){
+ .hero-g,.safe-g,.pv-g,.two{grid-template-columns:1fr}
+ .nav-links{display:none}.hero{padding-top:44px}.sec{padding:60px 0}
+ #app.on{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+ aside{border-right:0;border-bottom:1px solid var(--rule);max-height:260px;overflow-y:auto}#past{flex:none;overflow:visible}
+}
+
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px}
+.tile{text-align:left;background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:18px;cursor:pointer;font:inherit;color:var(--ink);transition:.15s}
+.tile:hover{border-color:var(--rust);transform:translateY(-2px)}
+.tile b{display:block;font:400 20px Georgia,serif;margin-bottom:4px}.tile span{color:var(--mut);font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0 18px}
+.stat{padding:18px}.stat b{display:block;font:400 34px Georgia,serif;color:var(--rust);line-height:1.1}.stat span{font-size:13px;color:var(--mut)}
+.chk{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:22px;font-size:14px;color:var(--mut);cursor:pointer}
+.chk input{width:18px;height:18px;accent-color:var(--rust)}
+.gnum{font:400 96px/1 Georgia,serif;color:var(--rust);text-align:center}
+.gtxt{text-align:center;font:400 22px/1.4 Georgia,serif;margin:10px auto 0;max-width:30em}
+.gdots{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:26px 0}
+.gd{width:36px;height:36px;border-radius:50%;border:2px solid var(--rust);background:none;cursor:pointer;transition:.12s}
+.gd.on{background:var(--rust)}
+.gd:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.prog{text-align:center;font-size:13px;color:var(--mut);margin-top:6px}
+#wel{position:fixed;inset:0;background:rgba(20,15,10,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;overflow-y:auto}
+.wel-card{background:var(--card);border-radius:22px;max-width:580px;width:100%;padding:30px;margin:auto}
+.wel-card h2{font-size:30px;margin:14px 0 8px}
+.wel-card .two{gap:12px;margin:18px 0}
+.wel-card .card{padding:16px}.wel-card h3{font-size:19px}
+.reduce .bc{transform:scale(.8)!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+@media (max-width:600px){.stats{grid-template-columns:1fr}}
+.ta{width:100%;min-height:96px;padding:12px 14px;border-radius:12px;border:1px solid var(--rule);background:var(--paper);font:inherit;color:inherit;resize:vertical;outline:0}
+.ta:focus{border-color:var(--rust);box-shadow:0 0 0 3px color-mix(in srgb,var(--rust) 18%,transparent)}
+.tl{display:block;margin:16px 0 6px;font-size:14px;color:var(--mut)}
+.rng{width:100%;accent-color:var(--rust);margin:14px 0 4px}
+.bar2{height:4px;background:var(--wash);border-radius:4px;margin:18px 0 4px;overflow:hidden}.bar2 i{display:block;height:100%;background:var(--rust)}
+.ba{display:flex;align-items:center;justify-content:center;gap:16px;margin:8px 0 4px;font:400 36px Georgia,serif}.ba small{font:400 13px system-ui;color:var(--mut);display:block;text-align:center}
+.quote{border-left:3px solid var(--rust);padding:4px 0 4px 14px;margin:12px 0;font:italic 18px/1.5 Georgia,serif}
+.snd{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--wash);border-radius:12px;padding:4px 4px 4px 12px;margin:8px 0;font-size:13px}
+.sbtn.on{border-color:var(--rust);background:var(--wash)}
+.tile svg{width:26px;height:26px;stroke:var(--rust);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;display:block;margin-bottom:10px}
+#past{flex:1;min-height:0;overflow-y:auto}
+.gbox{margin:10px 6px 4px;padding:12px;border:1px dashed var(--rule);border-radius:12px}.gbox p{margin:0 0 8px;font-size:13px}
+.fine{font-size:12px;line-height:1.45}
+.sel{width:100%;height:42px;border-radius:12px;border:1px solid var(--rule);background:var(--paper);color:inherit;font:inherit;padding:0 10px}
+@media (max-width:600px){.tiles{grid-template-columns:1fr}}
+.sel.sm{width:auto;height:36px;font-size:14px;margin-left:auto}
+.head{flex-wrap:wrap}
+.mic{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--rule);background:none;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
+.mic:hover{border-color:var(--rust)}.mic.on{background:var(--rust);border-color:var(--rust);color:#fff;animation:pulse 1.2s infinite}
+.mic svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+@keyframes pulse{50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--rust) 25%,transparent)}}
+.rq{font:400 22px/1.4 Georgia,serif;margin-top:6px}
+.wave{width:84px;height:30px;flex:none}
+</style>
+</head>
+<body>
+
+<!-- ============ HOME ============ -->
+<div id="home">
+  <header class="nav"><div class="wrap nav-in">
+    <span class="logo"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10"/><path d="M8 24V15a8 8 0 0 1 16 0v9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="16" cy="19" r="2.6" fill="#fff"/></svg>Haven</span>
+    <nav class="nav-links"><a href="#how">How it works</a><a href="#tools">Features</a><a href="#safety">Safety</a><a href="#privacy">Privacy</a><a href="#faq">FAQ</a></nav>
+    <div class="nav-act"><button class="btn out sm go-in">Sign in</button><button class="btn pri sm go-up">Get started</button></div>
+  </div></header>
+
+  <section class="hero"><div class="wrap hero-g">
+    <div>
+      <span class="eyebrow">AI support companion · free to try</span>
+      <h1>A quiet place to <em>think out loud.</em></h1>
+      <p class="lead">Talk through what's weighing on you with a companion that listens, reflects back, and leaves you with a few small things to try. No appointment. No judgment.</p>
+      <div class="cta"><button class="btn acc go-up">Create a free account</button><button class="btn out go-guest">Try it as a guest</button></div>
+      <div class="trust"><span>English, മലയാളം, हिन्दी, தமிழ்</span><span>Replies in real time</span><span>Crisis-aware</span><span>Delete anytime</span></div>
+    </div>
+    <div class="mock" aria-hidden="true">
+      <div class="top"><i></i>Session in progress</div>
+      <div class="bub a">I'm glad you're here. What's on your mind?</div>
+      <div class="bub u">Work has been overwhelming and I can't switch off at night.</div>
+      <div class="bub a">That sounds exhausting. When your mind won't settle, what does the night usually look like?</div>
+      <div class="chip"><b>3</b> coping steps ready in your summary</div>
+    </div>
+  </div></section>
+
+  <section class="sec alt" id="how"><div class="wrap">
+    <h2>How a session works</h2>
+    <p class="sub">Four calm steps, start to finish. About ten minutes is plenty.</p>
+    <div class="grid4">
+      <div class="card step"><div class="n">1</div><h3>Check in</h3><p>Tell Haven how you're feeling, from very low to great.</p></div>
+      <div class="card step"><div class="n">2</div><h3>Talk</h3><p>Write freely. Haven replies as you go and asks gentle questions.</p></div>
+      <div class="card step"><div class="n">3</div><h3>Reflect</h3><p>End the session for a summary, themes and coping steps tailored to you.</p></div>
+      <div class="card step"><div class="n">4</div><h3>Return</h3><p>Reread past sessions, or delete them whenever you like.</p></div>
+    </div>
+  </div></section>
+
+  <section class="sec" id="tools"><div class="wrap">
+    <h2>Small tools that help</h2>
+    <p class="sub">Everything is built to help you slow down and notice what you feel.</p>
+    <div class="grid4">
+      <div class="card feat"><h3>Mood check-ins</h3><p>A quick rating before each session, charted over time.</p></div>
+      <div class="card feat"><h3>Session summaries</h3><p>Themes and next steps you can download and keep.</p></div>
+      <div class="card feat"><h3>Guided breathing</h3><p>A paced breathing exercise for when words are too much.</p></div>
+      <div class="card feat"><h3>Private history</h3><p>Your sessions are yours: reread them or erase them.</p></div>
+    </div>
+  </div></section>
+
+  <section class="sec alt"><div class="wrap two">
+    <div class="card yes"><h3 style="font-size:26px">What Haven is</h3><ul><li>A place to put thoughts into words</li><li>Supportive, reflective listening</li><li>A source of small, practical coping ideas</li></ul></div>
+    <div class="card no"><h3 style="font-size:26px">What it isn't</h3><ul><li>A therapist, doctor or diagnosis</li><li>A crisis or emergency service</li><li>A replacement for people who care about you</li></ul></div>
+  </div></section>
+
+  <section class="sec" id="safety"><div class="wrap safe-g">
+    <div><h2>Your safety comes first</h2>
+      <p class="sub" style="margin:0">If you write something suggesting you might harm yourself or someone else, Haven shows emergency helplines right in the conversation and encourages you to reach a real person. If you're in danger now, don't wait.</p></div>
+    <div class="crisis" id="homeHelp"></div>
+  </div></section>
+
+  <section class="sec alt" id="privacy"><div class="wrap pv-g">
+    <div><h2>Privacy, plainly</h2>
+      <ul><li>Signed-in sessions are stored so you can see your history.</li>
+      <li>Your messages are sent to an AI provider (Groq) to write replies, and a second AI check reads each message for signs of crisis, in any language.</li>
+      <li>If you use the microphone, your browser (for example Chrome) sends your voice to its own speech service to turn it into text.</li>
+      <li>Passwords are hashed, never stored in plain text.</li>
+      <li>Guest sessions are deleted when you sign out.</li>
+      <li>You can delete any session, or your whole account.</li></ul>
+      <p class="meta" style="margin-top:16px">A student project. Please avoid sharing highly sensitive details.</p></div>
+    <div id="faq"><h2>Questions</h2>
+      <details class="faq"><summary>Is this therapy?</summary><p>No. Haven is an AI companion for reflection. It can't diagnose or treat anything, and it can make mistakes.</p></details>
+      <details class="faq"><summary>Do I need an account?</summary><p>No. Guest mode gives you full sessions, and you can reread them until you sign out. After that they are deleted, unless you save them to a free account.</p></details>
+      <details class="faq"><summary>Who can see my conversations?</summary><p>They're stored in the app's database and sent to the AI provider to generate replies.</p></details>
+      <details class="faq"><summary>What if I'm in crisis?</summary><p>Call 112 or a helpline such as Tele-MANAS (14416) right away. Numbers are listed in the safety section.</p></details>
+    </div>
+  </div></section>
+
+  <section class="band"><div class="wrap">
+    <h2>Ready when you are.</h2>
+    <p>Take a few minutes for yourself. You don't have to have the right words.</p>
+    <button class="btn acc go-up">Start your first session</button>
+  </div></section>
+
+  <footer class="f"><div class="wrap"><span>© Haven · An experimental AI tool, not a medical service.</span><span>In an emergency, call 112.</span></div></footer>
+</div>
+
+<!-- ============ AUTH ============ -->
+<section id="auth"><div class="ac card">
+  <button class="btn ghost sm" id="bBack" style="margin:-8px 0 0 -10px">← Home</button>
+  <div class="logo" style="margin:14px 0 4px"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10"/><path d="M8 24V15a8 8 0 0 1 16 0v9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="16" cy="19" r="2.6" fill="#fff"/></svg>Haven</div>
+  <h1 style="font-size:30px" id="aTitle">Welcome</h1>
+  <div class="tabs" id="tabs"><button id="tIn" class="on">Sign in</button><button id="tUp">Create account</button></div>
+  <div class="fld"><label for="em">Email</label><input id="em" type="email" autocomplete="email"></div>
+  <div class="fld"><label for="pw">Password <span id="pwh" class="hide">(8+ characters)</span></label><input id="pw" type="password" autocomplete="current-password"></div>
+  <p class="err" id="err"></p>
+  <button class="btn pri block" id="bSubmit">Sign in</button>
+  <div class="or" id="orRow">or</div>
+  <button class="btn out block" id="bGuest">Continue as guest</button>
+  <p class="meta" id="gNote" style="margin:12px 0 0;text-align:center">Guest sessions stay visible until you sign out, then they are deleted.</p>
+</div></section>
+
+<!-- ============ APP ============ -->
+<div id="app">
+  <aside>
+    <div class="logo"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10"/><path d="M8 24V15a8 8 0 0 1 16 0v9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="16" cy="19" r="2.6" fill="#fff"/></svg>Haven</div>
+    <button class="btn pri block" id="bNew">+ New session</button>
+    <button class="nav-i" id="bToday"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/></svg>Today</button>
+    <button class="nav-i" id="bBreath"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>Breathing</button>
+    <button class="nav-i" id="bThought"><svg viewBox="0 0 24 24"><path d="M3 12c2-5 4-5 6 0s4 5 6 0 4-5 6 0"/></svg>Untangle a thought</button>
+    <button class="nav-i" id="bSounds"><svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6L8 10zM17 9a4 4 0 0 1 0 6"/></svg>Calm sounds</button>
+    <button class="nav-i" id="bInsights"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Insights</button>
+    <div class="snd hide" id="sndBadge"><span id="sndTxt"></span><button class="btn ghost sm" id="sndStop">Stop</button></div>
+    <div class="lab">Past sessions</div>
+    <div id="past"></div>
+    <div class="side-foot">
+      <div id="acct" style="font-weight:600;color:var(--ink)"></div>
+      <div class="row"><button class="btn ghost sm" id="bOut">Sign out</button><button class="btn ghost sm" id="bAbout">About Haven</button><button class="btn ghost sm hide" id="bDel">Delete account</button></div>
+      <div class="fine">AI can make mistakes. Emergency? Call 112 or Tele-MANAS 14416.</div>
+    </div>
+  </aside>
+  <main>
+    <div class="head hide" id="head"><div class="t">Session in progress<small>Write whatever feels true.</small></div><select id="lang" class="sel sm" aria-label="Chat language"></select><button class="btn out sm" id="bEnd">End &amp; summarize</button></div>
+    <div class="pane" id="pane"><div class="col" id="col"></div></div>
+    <div class="bar hide" id="bar">
+      <div class="comp"><input id="inp" placeholder="Write here…" maxlength="2000" autocomplete="off"><canvas id="wave" class="wave hide" width="168" height="60" aria-hidden="true"></canvas><button class="mic" id="bMic" type="button" aria-label="Speak instead of typing" title="Speak instead of typing"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><button class="send" id="bSend" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+      <div class="note">Haven is not a therapist. If you're in danger, contact emergency services.</div>
+    </div>
+  </main>
+</div>
+
+<div id="wel" class="hide" role="dialog" aria-modal="true" aria-labelledby="welT"><div class="wel-card">
+  <div class="logo"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10"/><path d="M8 24V15a8 8 0 0 1 16 0v9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="16" cy="19" r="2.6" fill="#fff"/></svg>Haven</div>
+  <h2 id="welT">Before we begin</h2>
+  <p class="meta" style="font-size:16px;margin:0">Haven is a calm space to talk through what's on your mind with an AI companion. Here is what to expect.</p>
+  <div class="two">
+    <div class="card yes"><h3>What Haven is</h3><ul><li>A place to put thoughts into words</li><li>Supportive, reflective listening</li><li>Small, practical coping ideas</li></ul></div>
+    <div class="card no"><h3>What it isn't</h3><ul><li>A therapist or a diagnosis</li><li>A crisis or emergency service</li><li>A replacement for real people</li></ul></div>
+  </div>
+  <p class="meta" style="margin:0 0 6px">Your messages are sent to an AI provider to write replies, so avoid very sensitive details.</p>
+  <p class="meta" style="margin:0 0 20px"><strong>In danger or thinking about harming yourself?</strong> Call 112, or Tele-MANAS on 14416 (free, 24/7).</p>
+  <button class="btn acc block" id="bWel">I understand, let's begin</button>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+let me=null,sid=null,busy=false,pending='';
+const ls={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v)}catch{}}};
+const LANGOPTS=[['auto','Auto (match what I write)'],['en','English'],['ml','മലയാളം (Malayalam)'],['mng','Manglish (Malayalam in English letters)'],['hi','हिन्दी (Hindi)'],['hng','Hinglish (Hindi in English letters)'],['ta','தமிழ் (Tamil)']];
+let lang=ls.get('haven_lang');if(!LANGOPTS.some(x=>x[0]===lang))lang='auto';
+const leave=()=>!sid||confirm('Leave this session without ending it? It will not be summarized or saved.');
+const api=async(path,method='GET',body)=>{
+  const r=await fetch('/api'+path,{method,headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});
+  const j=await r.json().catch(()=>({}));
+  if(r.status===401&&me&&path!=='/me'){location.reload();return}
+  if(!r.ok)throw new Error(j.error||'Something went wrong');
+  return j;
+};
+const HELP=`<h3>If you are in danger or thinking about harming yourself or someone else</h3>
+<p>Call <a href="tel:112">112</a>, India's emergency number, or go to the nearest hospital emergency room.</p>
+<ul><li>Tele-MANAS (free, 24/7, many languages): <a href="tel:14416">14416</a> or <a href="tel:18008914416">1-800-891-4416</a></li>
+<li>KIRAN mental health helpline (free, 24/7): <a href="tel:18005990019">1800-599-0019</a></li></ul>
+<p>If you can, tell someone you trust and stay near them.</p>`;
+const helpCard=()=>{const d=el('div','crisis');d.style.marginBottom='18px';d.innerHTML=HELP;return d};
+$('#homeHelp').innerHTML=HELP;
+
+/* ---- screens ---- */
+const screens={home:$('#home'),auth:$('#auth'),app:$('#app')};
+function go(n){Object.entries(screens).forEach(([k,e])=>e.classList.toggle('on',k===n));window.scrollTo(0,0)}
+let mode='in';
+function setMode(m){mode=m;$('#tIn').classList.toggle('on',m==='in');$('#tUp').classList.toggle('on',m==='up');
+  $('#bSubmit').textContent=m==='in'?'Sign in':'Create account';$('#pwh').classList.toggle('hide',m==='in');$('#err').textContent=''}
+$('#tIn').onclick=()=>setMode('in');$('#tUp').onclick=()=>setMode('up');
+document.querySelectorAll('.go-in').forEach(b=>b.onclick=()=>{setMode('in');go('auth')});
+document.querySelectorAll('.go-up').forEach(b=>b.onclick=()=>{setMode('up');go('auth')});
+document.querySelectorAll('.go-guest').forEach(b=>b.onclick=guest);
+let upgrading=false;
+function setUpgrade(on){upgrading=on;
+  ['#tabs','#orRow','#bGuest','#gNote'].forEach(x=>$(x).classList.toggle('hide',on));
+  $('#aTitle').textContent=on?'Save your sessions':'Welcome';
+  if(on){setMode('up');$('#bSubmit').textContent='Create account and keep my sessions'}}
+function openUpgrade(){setUpgrade(true);go('auth')}
+$('#bBack').onclick=()=>{if(upgrading){setUpgrade(false);go('app')}else go('home')};
+async function guest(){try{me=await api('/guest','POST');enter()}catch(e){$('#err').textContent=e.message}}
+$('#bGuest').onclick=guest;
+async function submit(){
+  const btn=$('#bSubmit');btn.disabled=true;$('#err').textContent='';
+  try{
+    me=await api(upgrading?'/upgrade':mode==='in'?'/login':'/register','POST',{email:$('#em').value,password:$('#pw').value});
+    if(upgrading){setUpgrade(false);go('app');$('#acct').textContent=me.email;$('#bDel').classList.remove('hide');loadPast();$('#em').value='';$('#pw').value=''}
+    else enter()}
+  catch(e){$('#err').textContent=e.message}
+  btn.disabled=false;
+}
+$('#bSubmit').onclick=submit;
+$('#em').onkeydown=e=>{if(e.key==='Enter')$('#pw').focus()};
+$('#pw').onkeydown=e=>{if(e.key==='Enter')submit()};
+$('#bOut').onclick=async()=>{if(me&&me.guest&&!confirm('Signing out will permanently delete your guest sessions. Continue?'))return;await api('/logout','POST');location.reload()};
+$('#bDel').onclick=async()=>{if(confirm('Permanently delete your account and all sessions?')){await api('/account','DELETE');location.reload()}};
+async function boot(){try{me=await api('/me');enter()}catch{go('home')}}
+function enter(){
+  go('app');$('#acct').textContent=me.guest?'Guest session':me.email;
+  $('#bDel').classList.toggle('hide',!!me.guest);loadPast();showToday();if(!ls.get('haven_welcome'))showWel();
+}
+LANGOPTS.forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;if(v===lang)o.selected=true;$('#lang').append(o)});
+$('#lang').onchange=()=>{lang=$('#lang').value;ls.set('haven_lang',lang)};
+/* voice input (Web Speech API: Chrome, Edge, Safari) */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const RLANG={auto:'en-IN',en:'en-IN',ml:'ml-IN',mng:'ml-IN',hi:'hi-IN',hng:'hi-IN',ta:'ta-IN'};
+let rec=null,wv=null;
+const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+async function startWave(){
+  stopWave();
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return;
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    if(!rec){stream.getTracks().forEach(t=>t.stop());return}
+    const ctx=new (window.AudioContext||window.webkitAudioContext)(),an=ctx.createAnalyser();
+    an.fftSize=256;an.smoothingTimeConstant=.75;ctx.createMediaStreamSource(stream).connect(an);
+    const cv=$('#wave'),g=cv.getContext('2d'),data=new Uint8Array(an.frequencyBinCount),still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    cv.classList.remove('hide');wv={stream,ctx,raf:0};
+    const draw=()=>{
+      if(!wv)return;an.getByteFrequencyData(data);g.clearRect(0,0,cv.width,cv.height);
+      g.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--rust').trim()||'#b4492c';
+      const n=12,bw=cv.width/n;
+      for(let i=0;i<n;i++){const v=still?.4:Math.min(1,data[1+Math.floor(i*1.5)]/255*1.8),h=Math.max(8,v*cv.height),x=i*bw+bw*.2,w=bw*.6;
+        g.beginPath();if(g.roundRect)g.roundRect(x,(cv.height-h)/2,w,h,w/2);else g.rect(x,(cv.height-h)/2,w,h);g.fill()}
+      wv.raf=requestAnimationFrame(draw)};
+    draw();
+  }catch{}
+}
+function stopWave(){if(!wv)return;cancelAnimationFrame(wv.raf);wv.stream.getTracks().forEach(t=>t.stop());try{wv.ctx.close()}catch{}wv=null;$('#wave').classList.add('hide')}
+if(!SR)$('#bMic').classList.add('hide');
+$('#bMic').onclick=()=>{
+  if(rec){rec.stop();return}
+  const base=$('#inp').value?$('#inp').value+' ':'';
+  rec=new SR();rec.lang=RLANG[lang]||'en-IN';rec.interimResults=true;rec.continuous=false;
+  rec.onresult=e=>{let t='';for(const r of e.results)t+=r[0].transcript;$('#inp').value=(base+t).slice(0,2000)};
+  rec.onend=()=>{rec=null;stopWave();$('#inp').placeholder='Write here…';$('#bMic').classList.remove('on');$('#inp').focus()};
+  rec.onerror=e=>{rec=null;stopWave();$('#inp').placeholder='Write here…';$('#bMic').classList.remove('on');if(e.error==='not-allowed'||e.error==='service-not-allowed')alert('Microphone access is blocked. Allow it in your browser settings to use voice input.')};
+  rec.onstart=()=>{if(!isMobile)startWave()}; // phones can't share the mic between speech and the meter, so they get the pulsing button only
+  try{rec.start();$('#bMic').classList.add('on');$('#inp').placeholder='Listening…'}catch{rec=null}
+};
+function chrome(chat){$('#bar').classList.toggle('hide',!chat);$('#head').classList.toggle('hide',!chat)}
+function active(id){document.querySelectorAll('.nav-i').forEach(b=>b.classList.toggle('on',b.id===id))}
+
+/* ---- new session ---- */
+function title(t){const h=el('h1','pg-h',t);h.classList.add('serif');return h}
+$('#bNew').onclick=()=>{
+  if(sid&&!confirm('Leave this session? It will not be summarized or saved unless you end it first.'))return;
+  newSession();
+};
+const MOODS=[['1','Very low'],['2','Low'],['3','Okay'],['4','Good'],['5','Great']];
+function newSession(){
+  sid=null;chrome(false);active('');
+  const c=$('#col');c.replaceChildren();
+  c.append(title('How are you feeling right now?'),el('p','meta','Tap the one that fits best. There is no right answer, and only you will see it.'));
+  const m=el('div','moods');
+  MOODS.forEach(([n,l])=>{const b=el('button','mood');b.append(el('b','',n),el('span','',l));b.onclick=()=>start(+n);m.append(b)});
+  c.append(m);
+}
+async function start(mood){
+  try{({id:sid}=await api('/sessions','POST',{mood}))}catch(e){alert(e.message);return}
+  $('#col').replaceChildren();chrome(true);
+  addMsg('ai',"I'm glad you're here. What's on your mind?");if(pending){$('#inp').value=pending;pending=''}$('#inp').focus();
+}
+function toBottom(){const p=$('#pane');requestAnimationFrame(()=>{p.scrollTop=p.scrollHeight})}
+function addMsg(role,text){
+  const d=el('div','msg'+(role==='me'?' me':''));
+  if(role!=='me')d.append(el('div','av','H'));
+  const b=el('div','bb',text);d.append(b);$('#col').append(d);toBottom();return b;
+}
+
+/* ---- chat (SSE) ---- */
+async function send(){
+  const text=$('#inp').value.trim();if(!text||busy||!sid)return;
+  if(rec)rec.stop();
+  $('#inp').value='';busy=true;$('#bSend').disabled=true;addMsg('me',text);
+  const t=addMsg('ai','');t.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';let got=false;
+  try{
+    const r=await fetch(`/api/sessions/${sid}/messages`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,lang})});
+    if(!r.ok)throw new Error((await r.json()).error);
+    const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
+    for(;;){
+      const {done,value}=await rd.read();if(done)break;
+      const pn=$('#pane'),near=pn.scrollHeight-pn.scrollTop-pn.clientHeight<160; // follow the reply only if you are already at the bottom
+      buf+=dec.decode(value,{stream:true});
+      let i;while((i=buf.indexOf('\n\n'))>=0){
+        const raw=buf.slice(0,i);buf=buf.slice(i+2);
+        const ev=(raw.match(/^event: (.*)$/m)||[])[1],data=JSON.parse((raw.match(/^data: (.*)$/m)||[])[1]||'null');
+        if(ev==='crisis')t.closest('.msg').before(helpCard());
+        else if(ev==='delta'){if(!got){t.textContent='';got=true}t.textContent+=data}
+        else if(ev==='error')t.textContent=data.message;
+      }
+      if(near)toBottom();
+    }
+  }catch(e){t.textContent=e.message}
+  busy=false;$('#bSend').disabled=false;$('#inp').focus();
+}
+$('#bSend').onclick=send;
+$('#inp').onkeydown=e=>{if(e.key==='Enter')send()};
+
+/* ---- summary & history ---- */
+$('#bEnd').onclick=async()=>{
+  if(!sid||busy)return;
+  $('#bEnd').disabled=true;$('#col').append(el('p','meta','Reflecting on your session…'));
+  try{const s=await api(`/sessions/${sid}/end`,'POST',{lang});sid=null;chrome(false);renderSummary(s);loadPast()}
+  catch(e){$('#col').append(el('p','err',e.message))}
+  $('#bEnd').disabled=false;
+};
+function renderSummary(s,withId){
+  active('');chrome(false);
+  const c=$('#col');c.replaceChildren();const m=s.summary,box=el('div','sum');
+  box.append(title('Session summary'),el('div','meta',new Date(s.started).toLocaleString()+' · felt '+MOODS[s.mood-1][1].toLowerCase()+' at the start'+(m.mood?' · by the end: '+m.mood.toLowerCase():'')));
+  if(s.crisis){const h=helpCard();h.style.margin='18px 0 0';box.append(h)}
+  box.append(el('p','',m.summary));
+  if(m.themes&&m.themes.length){const d=el('div');m.themes.forEach(x=>d.append(el('span','tag',x)));box.append(d)}
+  box.append(el('h3','','Things you can try'));
+  const ol=el('ol','steps-l');(m.copingSteps||[]).forEach(x=>ol.append(el('li','',x)));box.append(ol);
+  const row=el('div','acts');
+  const b=el('button','btn pri','Start a new session');b.onclick=newSession;row.append(b);
+  const dl=el('button','btn out','Download');
+  dl.onclick=()=>{const txt=['Haven session summary',new Date(s.started).toLocaleString(),'',m.summary,'','Themes: '+(m.themes||[]).join(', '),'','Things you can try:',...(m.copingSteps||[]).map((x,i)=>(i+1)+'. '+x)].join('\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='haven-session.txt';a.click()};
+  row.append(dl);
+  if(me&&me.guest){const sv=el('button','btn acc','Save my sessions');sv.onclick=openUpgrade;row.append(sv)}
+  if(withId){const d=el('button','btn ghost','Delete');d.onclick=async()=>{if(confirm('Delete this session for good?')){await api('/sessions/'+withId,'DELETE');loadPast();newSession()}};row.append(d)}
+  box.append(row);c.append(box);
+  if(withId)api('/sessions/'+withId).then(f=>{const det=el('details');det.style.marginTop='28px';det.append(el('summary','','Read the conversation'));
+    f.messages.forEach(x=>{det.append(el('p','meta',(x.role==='user'?'You: ':'Haven: ')+x.content))});box.append(det)});
+}
+async function loadPast(){
+  const box=$('#past');box.replaceChildren();
+  const list=await api('/sessions');
+  if(!list.length){const p=el('p','meta','Your sessions will appear here.');p.style.padding='0 12px';box.append(p)}
+  if(list.length>=2){const t=el('div','trend');list.slice().reverse().forEach(s=>{const b=el('i');b.style.height=(s.mood*20)+'%';b.title=new Date(s.started).toLocaleDateString()+': '+s.mood+'/5';t.append(b)});box.append(t)}
+  list.forEach(s=>{
+    const d=el('div','past');
+    d.append(el('b','',new Date(s.started).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})));
+    d.append(el('small','',(s.summary&&s.summary.themes||[]).slice(0,2).join(', ')||'Session'));
+    d.onclick=()=>{if(sid&&!confirm('Leave this session without ending it?'))return;sid=null;renderSummary(s,s.id)};
+    box.append(d);
+  });
+  if(me.guest){const g=el('div','gbox');g.append(el('p','meta','Guest sessions stay here until you sign out.'));
+    const sv=el('button','btn acc sm','Save my sessions');sv.onclick=openUpgrade;g.append(sv);box.append(g)}
+}
+
+/* ---- welcome (first visit) ---- */
+function showWel(){$('#wel').classList.remove('hide');$('#bWel').focus()}
+function hideWel(){$('#wel').classList.add('hide');ls.set('haven_welcome','1')}
+$('#bWel').onclick=hideWel;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#wel').classList.contains('hide'))hideWel()});
+$('#bAbout').onclick=showWel;
+
+/* ---- today (home) ---- */
+function moodCards(parent,onPick){const m=el('div','moods');m.style.marginBottom='0';
+  MOODS.forEach(([n,l])=>{const b=el('button','mood');b.append(el('b','',n),el('span','',l));b.onclick=()=>onPick(+n);m.append(b)});parent.append(m)}
+const PROMPTS=['What is one small thing that went okay today?','What is taking up the most space in your mind right now?','Who or what made today a little easier?','What did your body need today, and did you give it?','What is one thing you are looking forward to, even a little?','What would you say to a friend who felt the way you feel today?','What is one thing you can let go of for tonight?','When did you feel most like yourself recently?','What is something you did recently that you are proud of?','What are you carrying that you could share with someone?','What helped the last time things felt heavy?','What does a gentle evening look like for you?','What is one boundary that would help you right now?','What made you smile or breathe out this week?','What are you worried about, and how much of it is in your control?','What is one kind thing you could do for yourself today?','Which feeling is loudest today, and what might it be telling you?','What is one thing you are grateful for, however small?','Who is someone you could reach out to this week?','What would “good enough” look like today?','What have you been putting off because it feels too big? What is the smallest first step?','What is a place or a sound that calms you?','What do you need more of right now, and what do you need less of?','What is one thing that went differently than you expected, and what did you learn?','If today had weather, what would it be?','What are you allowed to rest from?','What is a small win from this week?','What are you hoping for in the next few months?','What would you like to remember about today?','What is one thing you did well this week?'];
+async function showToday(){
+  sid=null;pending='';chrome(false);active('bToday');
+  const c=$('#col');c.replaceChildren();
+  const hr=new Date().getHours(),g=hr<5?'Hello':hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
+  c.append(title(g+(me.guest?'':', '+me.email.split('@')[0])),el('p','meta',new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})));
+  const ci=el('div','card');ci.style.marginTop='22px';
+  ci.append(el('h3','','How are you feeling right now?'),el('p','meta','Tap one to begin a session.'));
+  moodCards(ci,start);c.append(ci);
+  let ri=Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/864e5)%PROMPTS.length;
+  const rc=el('div','card');rc.style.marginTop='18px';
+  const rlb=el('div','meta','Today’s reflection'),rq=el('div','rq',PROMPTS[ri]),ra=el('div','acts');ra.style.marginTop='14px';
+  const rb=el('button','btn acc sm','Reflect on this with Haven');
+  rb.onclick=()=>{pending='Today’s reflection: '+PROMPTS[ri]+' ';newSession()};
+  const rn=el('button','btn ghost sm','Another question');
+  rn.onclick=()=>{ri=(ri+1)%PROMPTS.length;rq.textContent=PROMPTS[ri]};
+  ra.append(rb,rn);rc.append(rlb,rq,ra);c.append(rc);
+  const t=el('div','tiles');
+  const IC=p=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg>';
+  [['Breathing','A slow, paced breathing exercise.',showBreath,'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>'],
+   ['Untangle a thought','Look at a worry from a kinder angle.',showThought,'<path d="M3 12c2-5 4-5 6 0s4 5 6 0 4-5 6 0"/>'],
+   ['Calm sounds','Soft rain, gentle waves or a warm pad.',showSounds,'<path d="M4 10v4h4l5 4V6L8 10zM17 9a4 4 0 0 1 0 6"/>'],
+   ['Insights','See how your mood has moved over time.',showInsights,'<path d="M5 20V10M12 20V4M19 20v-7"/>']]
+    .forEach(([a,d,fn,ic])=>{const x=el('button','tile');x.innerHTML=IC(ic);x.append(el('b','',a),el('span','',d));x.onclick=fn;t.append(x)});
+  c.append(t);
+  try{
+    const list=await api('/sessions'),s=list&&list[0];
+    if(s&&s.summary&&(s.summary.copingSteps||[])[0]&&document.body.contains(t)){
+      const k=el('div','card');k.style.marginTop='18px';
+      k.append(el('div','meta','From your last session · '+new Date(s.started).toLocaleDateString()),el('p','','Something you could try today: '+s.summary.copingSteps[0]));
+      const o=el('button','btn ghost sm','Open that summary');o.onclick=()=>renderSummary(s,s.id);k.append(o);c.append(k);
+    }
+  }catch{}
+}
+
+/* ---- breathing (with reduced motion) ---- */
+let reduce=ls.get('haven_rm')!==null?ls.get('haven_rm')==='1':matchMedia('(prefers-reduced-motion: reduce)').matches;
+function showBreath(){
+  sid=null;chrome(false);active('bBreath');
+  const c=$('#col');c.replaceChildren();
+  const wrap=el('div','bwrap'+(reduce?' reduce':'')),circ=el('div','bc');wrap.append(el('div','bring'),circ);
+  const lab=el('div','blab','Ready'),cnt=el('div','bcount','In for 4 · hold for 2 · out for 6');
+  const btn=el('button','btn acc','Begin');btn.style.cssText='display:flex;margin:0 auto';
+  const rl=el('label','chk'),rm=document.createElement('input');rm.type='checkbox';rm.checked=reduce;
+  rl.append(rm,document.createTextNode(' Reduce motion (show a countdown instead of the moving circle)'));
+  c.append(title('Breathe'),el('p','meta','Follow the circle, or the countdown. Slow, steady breaths can help your body settle.'),wrap,lab,cnt,btn,rl);
+  const P=[['Breathe in',4,1],['Hold',2,1],['Breathe out',6,.5]];
+  let run=false,timer,i=0,left=0,n=0;
+  const show=()=>{const t=P[i%3][0];lab.textContent=reduce?t+' · '+left:t};
+  const begin=()=>{const [t,d,sc]=P[i%3];left=d;if(i%3===0){n++;cnt.textContent='Breath '+n}
+    if(!reduce){circ.style.transition=t==='Hold'?'none':'transform '+d+'s ease-in-out';circ.style.transform='scale('+sc+')'}show()};
+  const tick=()=>{if(!run||!document.body.contains(circ))return;left--;if(left<=0){i++;begin()}else show();timer=setTimeout(tick,1000)};
+  btn.onclick=()=>{run=!run;btn.textContent=run?'Stop':'Begin';clearTimeout(timer);
+    if(run){i=0;n=0;begin();timer=setTimeout(tick,1000)}
+    else{circ.style.transition='transform 1s ease-in-out';circ.style.transform='scale(.5)';lab.textContent='Ready';cnt.textContent='Nicely done'}};
+  rm.onchange=()=>{reduce=rm.checked;ls.set('haven_rm',reduce?'1':'0');wrap.classList.toggle('reduce',reduce);if(!reduce)circ.style.transform='scale(.5)';if(run)show()};
+}
+
+/* ---- untangle a thought (guided thought record; stays in this tab, nothing is saved or sent) ---- */
+function showThought(){
+  sid=null;chrome(false);active('bThought');
+  const T={thought:'',before:50,pro:'',con:'',balanced:'',after:50};let k=0,err='';
+  const c=$('#col');
+  const ta=(val,ph,fn)=>{const x=document.createElement('textarea');x.className='ta';x.value=val;x.placeholder=ph;x.maxLength=600;x.oninput=()=>fn(x.value);return x};
+  const slider=(val,fn)=>{const w=el('div'),n=el('div','gnum',val+'%');n.style.fontSize='60px';
+    const r=document.createElement('input');r.type='range';r.min=0;r.max=100;r.value=val;r.className='rng';
+    r.oninput=()=>{n.textContent=r.value+'%';fn(+r.value)};
+    const sc=el('div','meta');sc.style.cssText='display:flex;justify-content:space-between';sc.append(el('span','','Not at all'),el('span','','Completely'));
+    w.append(n,r,sc);return w};
+  const S=[
+    {h:'What is the thought that is bothering you?',s:'Write it the way it sounds in your head.',b:()=>ta(T.thought,'For example: I am going to fail and everyone will notice.',v=>T.thought=v),ok:()=>T.thought.trim().length>2},
+    {h:'How strongly do you believe it right now?',s:'There is no right answer. Slide to where it feels true.',b:()=>slider(T.before,v=>T.before=v),ok:()=>true},
+    {h:'Look at the evidence',s:'Be fair to both sides. What would you say to a friend who had this thought?',b:()=>{const w=el('div');
+      w.append(el('label','tl','What supports this thought?'),ta(T.pro,'Facts, not feelings...',v=>T.pro=v),
+               el('label','tl','What does not fit, or what might you be overlooking?'),ta(T.con,'Times it was not true, other explanations...',v=>T.con=v));return w},ok:()=>true},
+    {h:'Write a kinder, more balanced thought',s:'It does not have to be positive, just fair and realistic.',b:()=>ta(T.balanced,'For example: This is hard and I am nervous, but I have handled difficult things before.',v=>T.balanced=v),ok:()=>T.balanced.trim().length>2},
+    {h:'How strongly do you believe the original thought now?',s:'Notice whether anything has shifted, even a little.',b:()=>slider(T.after,v=>T.after=v),ok:()=>true}
+  ];
+  const draw=()=>{
+    c.replaceChildren();
+    c.append(title('Untangle a thought'),el('p','meta','A guided way to look at a worry more fairly. Nothing here is saved or sent anywhere. Download it if you want to keep it.'));
+    const card=el('div','card');card.style.marginTop='22px';
+    if(k>=S.length){
+      const dif=T.after-T.before;
+      card.append(el('h3','','Your result'),el('div','meta','The thought'),el('div','quote',T.thought.trim()));
+      const ba=el('div','ba');const x=el('div');x.append(document.createTextNode(T.before+'%'),el('small','','before'));
+      const y=el('div');y.append(document.createTextNode(T.after+'%'),el('small','','after'));ba.append(x,document.createTextNode('→'),y);card.append(ba);
+      card.append(el('p','meta',dif<0?'The thought feels less strong than before.':dif===0?'It feels about the same, and that is okay. Sometimes it takes a few tries, or talking it through.':'It feels stronger right now, which can happen. Talking it through with someone may help.'));
+      card.append(el('div','meta','A more balanced thought'),el('div','quote',T.balanced.trim()));
+      const r=el('div','acts');
+      const t=el('button','btn acc','Talk it through with Haven');
+      t.onclick=()=>{pending=('I just worked through a thought: "'+T.thought.trim()+'". A more balanced way to see it might be: "'+T.balanced.trim()+'". I would like to talk about it.').slice(0,2000);newSession()};
+      const d=el('button','btn out','Download');
+      d.onclick=()=>{const txt=['Haven: untangle a thought',new Date().toLocaleString(),'','Thought: '+T.thought,'Belief before: '+T.before+'%','','Supports it: '+(T.pro||'-'),'Does not fit: '+(T.con||'-'),'','Balanced thought: '+T.balanced,'Belief after: '+T.after+'%'].join('\n');
+        const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='haven-thought.txt';a.click()};
+      const s=el('button','btn ghost','Start over');s.onclick=showThought;
+      r.append(t,d,s);card.append(r);
+    }else{
+      const st=S[k];
+      card.append(el('h3','',st.h),el('p','meta',st.s),st.b());
+      const pb=el('div','bar2');const bi=el('i');bi.style.width=((k+1)/S.length*100)+'%';pb.append(bi);card.append(pb,el('div','prog','Step '+(k+1)+' of '+S.length));
+      const e=el('p','err',err);e.style.margin='8px 0 0';card.append(e);
+      const r=el('div','acts');r.style.marginTop='8px';
+      if(k>0){const p=el('button','btn ghost','Back');p.onclick=()=>{err='';k--;draw()};r.append(p)}
+      const nx=el('button','btn acc',k===S.length-1?'See my result':'Next');
+      nx.onclick=()=>{if(!st.ok()){err='Add a few words to continue.';draw();return}err='';k++;draw()};
+      r.append(nx);card.append(r);
+    }
+    c.append(card);
+  };
+  draw();
+}
+
+/* ---- calm sounds (generated in the browser with Web Audio; levels calibrated by A-weighted loudness) ---- */
+let AC=null,PB=null,snd=null,vol=.35,sndTimer=null,timerMin=0;
+const SOUNDS=[['rain','Soft rain'],['ocean','Gentle waves'],['hum','Warm pad']],K={rain:2.5,ocean:9.7,hum:1.6};
+const gainFor=k=>vol*vol*K[k];
+function pinkBuf(){ // 10 s of pink noise (softer than white), looped seamlessly with an equal-power crossfade
+  const sr=AC.sampleRate,N=sr*10,F=sr,tot=N+F,raw=new Float32Array(tot);let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+  for(let i=0;i<tot;i++){const w=Math.random()*2-1;
+    b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;
+    raw[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11;b6=w*.115926}
+  const b=AC.createBuffer(1,N,sr),d=b.getChannelData(0);
+  for(let i=0;i<N;i++)d[i]=i<F?raw[i]*Math.sqrt(i/F)+raw[N+i]*Math.sqrt(1-i/F):raw[i];
+  return b}
+function updBadge(){const on=!!snd;$('#sndBadge').classList.toggle('hide',!on);if(on)$('#sndTxt').textContent='Playing: '+SOUNDS.find(x=>x[0]===snd.kind)[1]}
+function stopSound(){
+  clearTimeout(sndTimer);if(!snd)return;const {master,nodes}=snd;snd=null;
+  try{master.gain.cancelScheduledValues(AC.currentTime);master.gain.setTargetAtTime(0,AC.currentTime,.2)}catch{}
+  setTimeout(()=>nodes.forEach(n=>{try{n.stop()}catch{}}),1500);updBadge();
+}
+function schedStop(){clearTimeout(sndTimer);if(snd&&timerMin)sndTimer=setTimeout(()=>{stopSound();if($('#vol'))showSounds()},timerMin*60000)}
+function playSound(kind){
+  stopSound();
+  AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume();
+  const now=AC.currentTime,master=AC.createGain(),lim=AC.createDynamicsCompressor();
+  lim.threshold.value=-14;lim.knee.value=8;lim.ratio.value=20;lim.attack.value=.003;lim.release.value=.25; // safety limiter
+  master.connect(lim);lim.connect(AC.destination);
+  master.gain.setValueAtTime(0,now);master.gain.linearRampToValueAtTime(gainFor(kind),now+3); // gentle 3 s fade-in
+  const nodes=[];
+  const src=()=>{PB=PB||pinkBuf();const s=AC.createBufferSource();s.buffer=PB;s.loop=true;nodes.push(s);return s};
+  const osc=(type,fr,det=0)=>{const o=AC.createOscillator();o.type=type;o.frequency.value=fr;o.detune.value=det;nodes.push(o);return o};
+  const bq=(type,fr,q=.5)=>{const x=AC.createBiquadFilter();x.type=type;x.frequency.value=fr;x.Q.value=q;return x};
+  if(kind==='rain'){
+    const s=src(),lp=bq('lowpass',3200),hp=bq('highpass',250),g=AC.createGain(),l=osc('sine',.07),lg=AC.createGain();
+    g.gain.value=1;lg.gain.value=.12;l.connect(lg);lg.connect(g.gain);
+    s.connect(lp);lp.connect(hp);hp.connect(g);g.connect(master);s.start();l.start();
+  }
+  if(kind==='ocean'){
+    const s=src(),lp=bq('lowpass',650),hp=bq('highpass',150),g=AC.createGain(),l=osc('sine',.09),lf=AC.createGain(),lg=AC.createGain();
+    g.gain.value=.4;lf.gain.value=350;lg.gain.value=.3;
+    l.connect(lf);lf.connect(lp.frequency);l.connect(lg);lg.connect(g.gain); // each wave opens the filter and swells the volume
+    s.connect(lp);lp.connect(hp);hp.connect(g);g.connect(master);s.start();l.start();
+  }
+  if(kind==='hum'){
+    const lp=bq('lowpass',1200);lp.connect(master);
+    [196,261.63,329.63,392,523.25].forEach((fr,i)=>[-4,4].forEach(d=>{
+      const o=osc(i<2?'triangle':'sine',fr,d),g=AC.createGain(),l=osc('sine',.03+.017*i),lg=AC.createGain();
+      g.gain.value=.08;lg.gain.value=.05;l.connect(lg);lg.connect(g.gain);o.connect(g);g.connect(lp);o.start();l.start()}));
+  }
+  snd={master,nodes,kind};updBadge();schedStop();
+}
+function showSounds(){
+  sid=null;chrome(false);active('bSounds');
+  const c=$('#col');c.replaceChildren();
+  c.append(title('Calm sounds'),el('p','meta','Soft background sound while you write or rest. Nothing plays until you press play, it fades in gently, and it keeps going while you move around the app.'));
+  const DESC={rain:'Gentle, steady rain',ocean:'Slow, rolling waves',hum:'A warm, slowly shifting tone'};
+  const t=el('div','tiles');t.style.marginTop='22px';t.style.gridTemplateColumns='repeat(auto-fit,minmax(170px,1fr))';
+  const draw=()=>{t.replaceChildren();SOUNDS.forEach(([k,l])=>{const on=!!(snd&&snd.kind===k);
+    const x=el('button','tile sbtn'+(on?' on':''));x.setAttribute('aria-pressed',String(on));
+    x.append(el('b','',l),el('span','',on?'Playing. Tap to stop.':DESC[k]));
+    x.onclick=()=>{if(on)stopSound();else playSound(k);draw()};t.append(x)})};
+  draw();c.append(t);
+  const vc=el('div','card');vc.style.marginTop='18px';
+  const lab=el('label','tl','Volume');lab.setAttribute('for','vol');lab.style.marginTop='0';
+  const r=document.createElement('input');r.type='range';r.id='vol';r.min=0;r.max=100;r.value=Math.round(vol*100);r.className='rng';
+  r.oninput=()=>{vol=r.value/100;if(snd)snd.master.gain.setTargetAtTime(gainFor(snd.kind),AC.currentTime,.1)};
+  const tl=el('label','tl','Stop automatically');tl.setAttribute('for','stm');
+  const sel=document.createElement('select');sel.id='stm';sel.className='sel';
+  [[0,'Never'],[15,'After 15 minutes'],[30,'After 30 minutes'],[60,'After 1 hour']].forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;if(v===timerMin)o.selected=true;sel.append(o)});
+  sel.onchange=()=>{timerMin=+sel.value;schedStop()};
+  vc.append(lab,r,tl,sel,el('p','meta','The sounds are generated in your browser. Nothing is downloaded or recorded. Start quietly and adjust to what feels comfortable.'));c.append(vc);
+}
+$('#sndStop').onclick=()=>{stopSound();if($('#vol'))showSounds()};
+
+/* ---- insights ---- */
+function chartSvg(data){
+  const W=640,H=230,L=72,B=34,T=12,pw=W-L-8,ph=H-B-T,n=data.length,bw=Math.min(38,pw/n*.6);let g='';
+  for(let v=1;v<=5;v++){const y=T+ph-(v/5)*ph;
+    g+=`<line x1="${L}" x2="${W-8}" y1="${y}" y2="${y}" style="stroke:var(--rule)"/><text x="${L-8}" y="${y+4}" text-anchor="end" style="fill:var(--mut);font-size:11px">${MOODS[v-1][1]}</text>`}
+  data.forEach((s,i)=>{const x=L+(i+.5)*pw/n,h=(s.mood/5)*ph,y=T+ph-h,d=new Date(s.started);
+    g+=`<rect x="${x-bw/2}" y="${y}" width="${bw}" height="${h}" rx="5" style="fill:var(--rust);opacity:.85"><title>${d.toLocaleDateString()}: ${MOODS[s.mood-1][1]}</title></rect>`;
+    if(n<=8||i%2===0)g+=`<text x="${x}" y="${H-12}" text-anchor="middle" style="fill:var(--mut);font-size:11px">${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}</text>`});
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="How you felt at the start of your last ${n} sessions">${g}</svg>`;
+}
+async function showInsights(){
+  sid=null;chrome(false);active('bInsights');
+  const c=$('#col');c.replaceChildren();
+  c.append(title('Insights'),el('p','meta','Patterns from your past sessions. Only you can see this.'));
+  let list;try{list=await api('/sessions')}catch(e){c.append(el('p','err',e.message));return}
+  if(!document.body.contains(c))return;
+  if(!list.length){const e=el('div','card');e.style.marginTop='22px';e.append(el('p','','Nothing to show yet. Finish a session and your mood chart and themes will appear here.'));
+    const b=el('button','btn pri','Start a session');b.onclick=showToday;e.append(b);c.append(e);return}
+  const asc=list.slice().reverse(),mean=a=>a.reduce((x,s)=>x+s.mood,0)/a.length;
+  const week=asc.filter(s=>s.started>Date.now()-7*864e5).length;
+  const st=el('div','stats');
+  [[asc.length,'Sessions so far'],[mean(asc).toFixed(1)+' / 5','Average starting mood'],[week,'Sessions in the last 7 days']].forEach(([v,l])=>{
+    const x=el('div','card stat');x.append(el('b','',String(v)),el('span','',l));st.append(x)});
+  c.append(st);
+  const cc=el('div','card');cc.append(el('h3','','How you felt at the start'));
+  const cw=el('div');cw.style.marginTop='10px';cw.innerHTML=chartSvg(asc.slice(-14));cc.append(cw);
+  if(asc.length>=4){const h=Math.floor(asc.length/2),d=mean(asc.slice(h))-mean(asc.slice(0,h));
+    const p=el('p','meta',d>.4?'Your more recent check-ins have been a little higher than your earlier ones.':d<-.4?'Your more recent check-ins have been a little lower than your earlier ones. Be gentle with yourself, and consider reaching out to someone you trust.':'Your check-ins have been fairly steady.');
+    p.style.margin='12px 0 0';cc.append(p)}
+  c.append(cc);
+  const cnt={};asc.forEach(s=>((s.summary&&s.summary.themes)||[]).forEach(t=>{const k=String(t).trim().toLowerCase();if(k)cnt[k]=(cnt[k]||0)+1}));
+  const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(top.length){const tc=el('div','card');tc.style.marginTop='18px';tc.append(el('h3','','What you talk about most'));
+    const w=el('div');w.style.marginTop='10px';top.forEach(([t,n])=>w.append(el('span','tag',t+(n>1?' · '+n:''))));tc.append(w);c.append(tc)}
+  if(me.guest){const gn=el('p','meta','You are using a guest session, so these insights disappear when you sign out. ');gn.style.marginTop='18px';
+    const sv=el('button','btn acc sm','Save my sessions');sv.onclick=openUpgrade;c.append(gn,sv)}
+}
+$('#bToday').onclick=()=>{if(leave())showToday()};
+$('#bBreath').onclick=()=>{if(leave())showBreath()};
+$('#bThought').onclick=()=>{if(leave())showThought()};
+$('#bSounds').onclick=()=>{if(leave())showSounds()};
+$('#bInsights').onclick=()=>{if(leave())showInsights()};
+boot();
+</script>
+</body>
+</html>
