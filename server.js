@@ -67,13 +67,25 @@ const CRISIS_NOTE = `\nNOTE: This person has expressed possible crisis or safety
 
 const LANGS = {
   auto: 'Reply in the same language and script the person writes in. If they write romanized Malayalam (Manglish) or romanized Hindi (Hinglish), reply in that same romanized, conversational style.',
-  en: 'Reply in English.',
+  en: 'Reply in English only, even if earlier messages in this conversation used another language.',
   ml: 'Reply in Malayalam, using Malayalam script.',
   mng: 'Reply in Manglish: Malayalam written in English letters, in a natural conversational style.',
   hi: 'Reply in Hindi, using Devanagari script.',
   hng: 'Reply in Hinglish: Hindi written in English letters, in a natural conversational style.',
   ta: 'Reply in Tamil, using Tamil script.',
 };
+// "Auto" is decided here in code, not by the AI: the script of the message, then a small Manglish/Hinglish word check, otherwise English.
+const SCRIPTS = [[/[\u0D00-\u0D7F]/, 'ml'], [/[\u0900-\u097F]/, 'hi'], [/[\u0B80-\u0BFF]/, 'ta']];
+const MNG = /\b(njan|enikku|enikk|ente|ninakku|ningal|entha|enthaa|aanu|alle|illa|undu|venam|vendaa|vendam|ayyo|chetta|chechi|mone|sheri|pinne|ippo|innu|ennaal|kurachu|othiri|sankadam|vishamam|thonnunnu|cheyyan|parayan|ariyilla|pattunnilla)\b/gi;
+const HNG = /\b(mujhe|mera|meri|mere|hai|hain|nahi|nahin|kya|kyun|kyu|bahut|thoda|accha|acha|theek|thik|yaar|bhai|lekin|abhi|samajh|dil|mann|thak|raha|rahi|karna|chahta|chahti)\b/gi;
+function effectiveLang(lang, text) {
+  if (lang !== 'auto') return lang;
+  for (const [re, l] of SCRIPTS) if (re.test(text)) return l;
+  const n = re => (text.match(re) || []).length;
+  if (n(MNG) >= 2) return 'mng';
+  if (n(HNG) >= 2) return 'hng';
+  return 'en';
+}
 const CLASSIFIER = `You are a safety classifier for a mental-health support chat used in India. Messages may be in English, Hindi, Malayalam, Tamil, or romanized mixes such as Manglish and Hinglish (for example "enikku marikkanam", "jeevikkan thalparyam illa", "marichal mathi", "mujhe marna hai", "jeene ka mann nahi").
 Decide whether the LATEST message, read in the context of the recent conversation, expresses suicidal thoughts, intent or a plan, self-harm, or intent to harm another person. Be sensitive to indirect expressions: not wanting to wake up, feeling like a burden, wanting everything to end, saying goodbye, giving things away. Do NOT flag ordinary sadness, stress or figures of speech (for example "this exam is killing me").
 Return ONLY a JSON object: {"crisis": true} or {"crisis": false}.`;
@@ -215,7 +227,7 @@ app.post('/api/sessions/:id/messages', auth, ownSession, h(async (req, res) => {
     let full = '';
     const stream = await client.chat.completions.create({
       model: MODEL, max_completion_tokens: 1200, reasoning_effort: 'low', stream: true,
-      messages: [{ role: 'system', content: SYS + '\nLanguage: ' + LANGS[lang] + (s.crisis ? CRISIS_NOTE : '') }, ...history],
+      messages: [{ role: 'system', content: SYS + '\nLanguage: ' + LANGS[effectiveLang(lang, text)] + (s.crisis ? CRISIS_NOTE : '') }, ...history],
     });
     for await (const chunk of stream) {
       const t = chunk.choices[0]?.delta?.content;
@@ -241,7 +253,7 @@ app.post('/api/sessions/:id/end', auth, ownSession, h(async (req, res) => {
     const r = await client.chat.completions.create({
       model: MODEL, max_completion_tokens: 2000, reasoning_effort: 'low', response_format: { type: 'json_object' },
       messages: [{ role: 'user', content:
-        `${LANGS[lang].replace(/^Reply/, 'Write')} Keep the JSON keys in English. Summarize this supportive conversation for the person, in second person, warm, no diagnosis. Return ONLY a JSON object: {"summary":"3-4 sentences","themes":["2-4 short themes"],"mood":"short phrase","copingSteps":["3-5 concrete gentle steps tailored to what they shared"]}${s.crisis ? '\nSafety concerns were raised; include reaching a crisis line or trusted person as one step.' : ''}\n\n${transcript}` }],
+        `${LANGS[effectiveLang(lang, msgs.filter(m => m.role === 'user').map(m => m.content).join(' '))].replace(/^Reply/, 'Write')} Keep the JSON keys in English. Summarize this supportive conversation for the person, in second person, warm, no diagnosis. Return ONLY a JSON object: {"summary":"3-4 sentences","themes":["2-4 short themes"],"mood":"short phrase","copingSteps":["3-5 concrete gentle steps tailored to what they shared"]}${s.crisis ? '\nSafety concerns were raised; include reaching a crisis line or trusted person as one step.' : ''}\n\n${transcript}` }],
     });
     summary = JSON.parse(r.choices[0].message.content);
   } catch {

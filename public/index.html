@@ -167,8 +167,13 @@ main{display:flex;flex-direction:column;min-width:0;min-height:0;height:100%}
 @media (max-width:900px){
  .hero-g,.safe-g,.pv-g,.two{grid-template-columns:1fr}
  .nav-links{display:none}.hero{padding-top:44px}.sec{padding:60px 0}
- #app.on{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
- aside{border-right:0;border-bottom:1px solid var(--rule);max-height:260px;overflow-y:auto}#past{flex:none;overflow:visible}
+ #app.on{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr)}
+ aside{position:fixed;top:0;bottom:0;left:0;width:min(84vw,320px);z-index:40;overflow-y:auto;transform:translateX(-102%);visibility:hidden;transition:transform .22s,visibility 0s .22s;box-shadow:none}
+ aside.open{transform:none;visibility:visible;transition:transform .22s;box-shadow:0 0 40px rgba(0,0,0,.35)}
+ #past{flex:none;overflow:visible}
+ #app .mbar{display:flex}
+ .head{gap:8px;padding:10px 14px}.head .t{flex:1;min-width:0}.head .t small{display:none}
+ .pane{padding:22px 16px}
 }
 
 .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px}
@@ -186,7 +191,7 @@ main{display:flex;flex-direction:column;min-width:0;min-height:0;height:100%}
 .gd.on{background:var(--rust)}
 .gd:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .prog{text-align:center;font-size:13px;color:var(--mut);margin-top:6px}
-#wel{position:fixed;inset:0;background:rgba(20,15,10,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;overflow-y:auto}
+#wel{position:fixed;inset:0;background:rgba(20,15,10,.55);display:flex;justify-content:center;padding:20px;z-index:50;overflow-y:auto}
 .wel-card{background:var(--card);border-radius:22px;max-width:580px;width:100%;padding:30px;margin:auto}
 .wel-card h2{font-size:30px;margin:14px 0 8px}
 .wel-card .two{gap:12px;margin:18px 0}
@@ -217,6 +222,18 @@ main{display:flex;flex-direction:column;min-width:0;min-height:0;height:100%}
 @keyframes pulse{50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--rust) 25%,transparent)}}
 .rq{font:400 22px/1.4 Georgia,serif;margin-top:6px}
 .wave{width:84px;height:30px;flex:none}
+.lm{position:relative;margin-left:auto}
+#bLang svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.lmenu{position:absolute;right:0;top:calc(100% + 6px);background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:6px;min-width:160px;box-shadow:0 12px 30px -12px rgba(0,0,0,.35);z-index:20}
+.lmenu button{display:flex;justify-content:space-between;align-items:center;gap:14px;width:100%;padding:9px 12px;border:0;background:none;border-radius:10px;font:500 14px system-ui;color:var(--ink);cursor:pointer;text-align:left}
+.lmenu button:hover{background:var(--wash)}.lmenu button[aria-checked="true"]{background:var(--wash);font-weight:600}
+.lmenu button span{color:var(--rust)}
+.mbar{display:none;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid var(--rule);background:var(--card)}
+.mb{width:44px;height:44px;border-radius:12px;border:1px solid var(--rule);background:none;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mb svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.scrim{position:fixed;inset:0;background:rgba(20,15,10,.45);z-index:30}
+.crisis a{display:inline-block;padding:6px 2px}
+.rng{height:28px}
 </style>
 </head>
 <body>
@@ -340,13 +357,15 @@ main{display:flex;flex-direction:column;min-width:0;min-height:0;height:100%}
     </div>
   </aside>
   <main>
-    <div class="head hide" id="head"><div class="t">Session in progress<small>Write whatever feels true.</small></div><select id="lang" class="sel sm" aria-label="Chat language"></select><button class="btn out sm" id="bEnd">End &amp; summarize</button></div>
+    <div class="mbar"><button class="mb" id="bMenu" type="button" aria-label="Open menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><span class="logo"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10"/><path d="M8 24V15a8 8 0 0 1 16 0v9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="16" cy="19" r="2.6" fill="#fff"/></svg>Haven</span></div>
+    <div class="head hide" id="head"><div class="t">Session in progress<small>Write whatever feels true.</small></div><div class="lm" id="lm"><button type="button" class="btn out sm" id="bLang" aria-haspopup="menu" aria-expanded="false" aria-label="Chat language"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg><span id="langTxt">Auto</span></button><div class="lmenu hide" id="lmenu" role="menu"></div></div><button class="btn out sm" id="bEnd">End &amp; summarize</button></div>
     <div class="pane" id="pane"><div class="col" id="col"></div></div>
     <div class="bar hide" id="bar">
       <div class="comp"><input id="inp" placeholder="Write here…" maxlength="2000" autocomplete="off"><canvas id="wave" class="wave hide" width="168" height="60" aria-hidden="true"></canvas><button class="mic" id="bMic" type="button" aria-label="Speak instead of typing" title="Speak instead of typing"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><button class="send" id="bSend" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
       <div class="note">Haven is not a therapist. If you're in danger, contact emergency services.</div>
     </div>
   </main>
+  <div class="scrim hide" id="scrim"></div>
 </div>
 
 <div id="wel" class="hide" role="dialog" aria-modal="true" aria-labelledby="welT"><div class="wel-card">
@@ -367,7 +386,7 @@ const $=s=>document.querySelector(s);
 const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 let me=null,sid=null,busy=false,pending='';
 const ls={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v)}catch{}}};
-const LANGOPTS=[['auto','Auto (match what I write)'],['en','English'],['ml','മലയാളം (Malayalam)'],['mng','Manglish (Malayalam in English letters)'],['hi','हिन्दी (Hindi)'],['hng','Hinglish (Hindi in English letters)'],['ta','தமிழ் (Tamil)']];
+const LANGOPTS=[['auto','Auto'],['en','English'],['ml','മലയാളം'],['mng','Manglish'],['hi','हिन्दी'],['hng','Hinglish'],['ta','தமிழ்']];
 let lang=ls.get('haven_lang');if(!LANGOPTS.some(x=>x[0]===lang))lang='auto';
 const leave=()=>!sid||confirm('Leave this session without ending it? It will not be summarized or saved.');
 const api=async(path,method='GET',body)=>{
@@ -423,8 +442,25 @@ function enter(){
   go('app');$('#acct').textContent=me.guest?'Guest session':me.email;
   $('#bDel').classList.toggle('hide',!!me.guest);loadPast();showToday();if(!ls.get('haven_welcome'))showWel();
 }
-LANGOPTS.forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;if(v===lang)o.selected=true;$('#lang').append(o)});
-$('#lang').onchange=()=>{lang=$('#lang').value;ls.set('haven_lang',lang)};
+const asideEl=document.querySelector('aside');
+function openMenu(){asideEl.classList.add('open');$('#scrim').classList.remove('hide');$('#bMenu').setAttribute('aria-expanded','true')}
+function closeMenu(){asideEl.classList.remove('open');$('#scrim').classList.add('hide');$('#bMenu').setAttribute('aria-expanded','false')}
+$('#bMenu').onclick=()=>asideEl.classList.contains('open')?closeMenu():openMenu();
+$('#scrim').onclick=closeMenu;
+asideEl.addEventListener('click',e=>{if(e.target.closest('button,.past'))closeMenu()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
+function closeLang(){$('#lmenu').classList.add('hide');$('#bLang').setAttribute('aria-expanded','false')}
+function drawLang(){
+  $('#langTxt').textContent=LANGOPTS.find(x=>x[0]===lang)[1];
+  const m=$('#lmenu');m.replaceChildren();
+  LANGOPTS.forEach(([v,l])=>{const b=document.createElement('button');b.type='button';b.setAttribute('role','menuitemradio');b.setAttribute('aria-checked',String(v===lang));b.textContent=l;
+    if(v===lang){const c=document.createElement('span');c.textContent='✓';b.append(c)}
+    b.onclick=()=>{lang=v;ls.set('haven_lang',v);drawLang();closeLang()};m.append(b)});
+}
+$('#bLang').onclick=e=>{e.stopPropagation();const hidden=$('#lmenu').classList.toggle('hide');$('#bLang').setAttribute('aria-expanded',String(!hidden))};
+document.addEventListener('click',e=>{if(!$('#lm').contains(e.target))closeLang()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLang()});
+drawLang();
 /* voice input (Web Speech API: Chrome, Edge, Safari) */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 const RLANG={auto:'en-IN',en:'en-IN',ml:'ml-IN',mng:'ml-IN',hi:'hi-IN',hng:'hi-IN',ta:'ta-IN'};
@@ -567,7 +603,7 @@ async function loadPast(){
 }
 
 /* ---- welcome (first visit) ---- */
-function showWel(){$('#wel').classList.remove('hide');$('#bWel').focus()}
+function showWel(){$('#wel').classList.remove('hide');$('#wel').scrollTop=0;$('#bWel').focus({preventScroll:true})}
 function hideWel(){$('#wel').classList.add('hide');ls.set('haven_welcome','1')}
 $('#bWel').onclick=hideWel;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#wel').classList.contains('hide'))hideWel()});
@@ -762,8 +798,8 @@ function showSounds(){
 $('#sndStop').onclick=()=>{stopSound();if($('#vol'))showSounds()};
 
 /* ---- insights ---- */
-function chartSvg(data){
-  const W=640,H=230,L=72,B=34,T=12,pw=W-L-8,ph=H-B-T,n=data.length,bw=Math.min(38,pw/n*.6);let g='';
+function chartSvg(data,W=640){
+  const H=W<500?190:230,L=W<500?56:72,B=34,T=12,pw=W-L-8,ph=H-B-T,n=data.length,bw=Math.min(38,pw/n*.6);let g='';
   for(let v=1;v<=5;v++){const y=T+ph-(v/5)*ph;
     g+=`<line x1="${L}" x2="${W-8}" y1="${y}" y2="${y}" style="stroke:var(--rule)"/><text x="${L-8}" y="${y+4}" text-anchor="end" style="fill:var(--mut);font-size:11px">${MOODS[v-1][1]}</text>`}
   data.forEach((s,i)=>{const x=L+(i+.5)*pw/n,h=(s.mood/5)*ph,y=T+ph-h,d=new Date(s.started);
@@ -786,7 +822,7 @@ async function showInsights(){
     const x=el('div','card stat');x.append(el('b','',String(v)),el('span','',l));st.append(x)});
   c.append(st);
   const cc=el('div','card');cc.append(el('h3','','How you felt at the start'));
-  const cw=el('div');cw.style.marginTop='10px';cw.innerHTML=chartSvg(asc.slice(-14));cc.append(cw);
+  const cw=el('div');cw.style.marginTop='10px';cw.innerHTML=chartSvg(asc.slice(-14),Math.max(260,Math.min(640,c.clientWidth-50)));cc.append(cw);
   if(asc.length>=4){const h=Math.floor(asc.length/2),d=mean(asc.slice(h))-mean(asc.slice(0,h));
     const p=el('p','meta',d>.4?'Your more recent check-ins have been a little higher than your earlier ones.':d<-.4?'Your more recent check-ins have been a little lower than your earlier ones. Be gentle with yourself, and consider reaching out to someone you trust.':'Your check-ins have been fairly steady.');
     p.style.margin='12px 0 0';cc.append(p)}
