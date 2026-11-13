@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -97,7 +98,8 @@ app.set('trust proxy', 1);
 app.use(express.json({ limit: '20kb' }));
 app.use(cookieParser());
 app.use((req, res, next) => { res.set({ 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'same-origin' }); next(); });
-app.use(express.static('public'));
+const PUBLIC = path.join(__dirname, 'public'); // absolute path so it also works inside Vercel's function
+app.use(express.static(PUBLIC));
 app.use('/api', rateLimit({ windowMs: 60_000, max: 60 }));
 const h = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 app.use('/api', h(async (req, res, next) => { await init(); next(); }));
@@ -248,6 +250,12 @@ app.post('/api/sessions/:id/end', auth, ownSession, h(async (req, res) => {
   await q('UPDATE sessions SET ended=$1, summary=$2 WHERE id=$3', [Date.now(), JSON.stringify(summary), s.id]);
   res.json({ id: s.id, mood: s.mood, started: s.started, crisis: s.crisis, summary });
 }));
+
+// Anything that is not an API call gets the app page
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api')) return res.status(404).json({ error: 'Not found' });
+  res.sendFile(path.join(PUBLIC, 'index.html'));
+});
 
 app.use((err, req, res, next) => {
   console.error(err);
