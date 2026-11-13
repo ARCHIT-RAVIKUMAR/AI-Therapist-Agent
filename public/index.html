@@ -234,6 +234,11 @@ main{display:flex;flex-direction:column;min-width:0;min-height:0;height:100%}
 .scrim{position:fixed;inset:0;background:rgba(20,15,10,.45);z-index:30}
 .crisis a{display:inline-block;padding:6px 2px}
 .rng{height:28px}
+#gslot:empty{display:none}
+#gslot .gbox{margin:6px 4px 8px}
+#past{scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+#past::-webkit-scrollbar{width:6px}#past::-webkit-scrollbar-thumb{background:var(--rule);border-radius:6px}
+@media (min-width:901px) and (max-height:860px){.nav-i{height:34px}.lab{padding-top:8px}aside .logo{padding-bottom:10px}}
 </style>
 </head>
 <body>
@@ -350,6 +355,7 @@ main{display:flex;flex-direction:column;min-width:0;min-height:0;height:100%}
     <div class="snd hide" id="sndBadge"><span id="sndTxt"></span><button class="btn ghost sm" id="sndStop">Stop</button></div>
     <div class="lab">Past sessions</div>
     <div id="past"></div>
+    <div id="gslot"></div>
     <div class="side-foot">
       <div id="acct" style="font-weight:600;color:var(--ink)"></div>
       <div class="row"><button class="btn ghost sm" id="bOut">Sign out</button><button class="btn ghost sm" id="bAbout">About Haven</button><button class="btn ghost sm hide" id="bDel">Delete account</button></div>
@@ -587,7 +593,7 @@ function renderSummary(s,withId){
     f.messages.forEach(x=>{det.append(el('p','meta',(x.role==='user'?'You: ':'Haven: ')+x.content))});box.append(det)});
 }
 async function loadPast(){
-  const box=$('#past');box.replaceChildren();
+  const box=$('#past');box.replaceChildren();$('#gslot').replaceChildren();
   const list=await api('/sessions');
   if(!list.length){const p=el('p','meta','Your sessions will appear here.');p.style.padding='0 12px';box.append(p)}
   if(list.length>=2){const t=el('div','trend');list.slice().reverse().forEach(s=>{const b=el('i');b.style.height=(s.mood*20)+'%';b.title=new Date(s.started).toLocaleDateString()+': '+s.mood+'/5';t.append(b)});box.append(t)}
@@ -599,7 +605,7 @@ async function loadPast(){
     box.append(d);
   });
   if(me.guest){const g=el('div','gbox');g.append(el('p','meta','Guest sessions stay here until you sign out.'));
-    const sv=el('button','btn acc sm','Save my sessions');sv.onclick=openUpgrade;g.append(sv);box.append(g)}
+    const sv=el('button','btn acc sm','Save my sessions');sv.onclick=openUpgrade;g.append(sv);$('#gslot').append(g)}
 }
 
 /* ---- welcome (first visit) ---- */
